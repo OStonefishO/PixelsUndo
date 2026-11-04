@@ -50,15 +50,18 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 ## 永久网址与镜像站
 
-项目主页（GitHub Pages，静态介绍页）会部署在：
+项目主页（GitHub Pages，静态介绍页）已经上线：
 
-**https://ostonefisho.github.io/PixelsUndo/**
+- 主站：**https://ostonefisho.github.io/PixelsUndo/**
+- 镜像：**https://cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/index.html**
 
-这个地址是永久的，可以放在手机书签里；它负责介绍、截图和下载入口。因为去水印依赖 Python + OpenCV，GitHub Pages **不能**直接运行完整应用，完整在线版需要一台云主机。
+主站是永久的，可以放在手机书签里；镜像走 jsDelivr CDN，适合主站访问慢时使用。它们负责介绍、截图和下载入口。因为去水印依赖 Python + OpenCV，GitHub Pages **不能**直接运行完整应用，完整在线版需要一台云主机。
 
 ### 部署完整在线版（Render）
 
-1. 登录 [Render](https://render.com)，选择 **New → Blueprint**，连接本仓库。
+一键入口：**https://render.com/deploy?repo=https://github.com/OStonefishO/PixelsUndo**
+
+1. 登录 [Render](https://render.com)，打开上面的 Blueprint 链接，或选择 **New → Blueprint** 连接本仓库。
 2. Render 会自动读取 `render.yaml` 和 `Dockerfile`，创建一个免费 Web Service。
 3. 部署完成后得到形如 `https://pixelsundo.onrender.com` 的永久 HTTPS 地址；手机可直接打开，也可“添加到主屏幕”。
 4. 建议在 Render 环境变量里设置 `PIXELSUNDO_PASSWORD`（自定义访问密码）。设置后浏览器会弹出登录框；`/api/health` 保持免密，供 Render 健康检查使用。
