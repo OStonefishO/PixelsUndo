@@ -1,4 +1,4 @@
-# Build the PixelsUndo Android WebView wrapper.
+﻿# Build the PixelsUndo Android WebView wrapper.
 # Requires: JDK 17 and Android SDK build-tools + platform 34.
 $ErrorActionPreference = "Stop"
 
@@ -11,8 +11,8 @@ $Out = Join-Path $AndroidDir "build"
 $Keystore = Join-Path $AndroidDir "pixelsundo-release.jks"
 $RealKeystore = Join-Path $ProjectRoot "android\pixelsundo-release.jks"
 $KeyPass = "pixelsundo"
-$VersionName = "1.1.0"
-$VersionCode = 110
+$VersionName = "1.2.0"
+$VersionCode = 120
 
 if (Test-Path $Root) { Remove-Item $Root -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
@@ -109,3 +109,4 @@ Assert-LastExit "apksigner verify"
 Copy-Item $Apk (Join-Path $ProjectRoot "PixelsUndo-Android.apk") -Force
 Copy-Item $Keystore $RealKeystore -Force
 Write-Host "7/7 done: $ProjectRoot\PixelsUndo-Android.apk"
+

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -50,6 +50,7 @@ h2{font-size:26px;margin:0 0 8px;letter-spacing:-.01em}
 .shot{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0b0f08}
 .shot img{display:block;width:100%;height:auto}
 .shot figcaption{padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);border-top:1px solid var(--line)}
+.shot.wide{grid-column:1/-1}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;counter-reset:s}
 .step{border:1px solid var(--line);border-radius:12px;padding:16px;background:#0b1008}
 .step:before{counter-increment:s;content:"0" counter(s);font-family:var(--mono);font-size:10px;color:var(--lime);letter-spacing:.1em}
@@ -90,7 +91,7 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
     </div>
     <div class="hero-card">
       <img src="assets/pixel.png" alt="PixelsUndo 像素工坊界面">
-      <span class="tag">v1.1.0 · PIXEL + REPAIR</span>
+      <span class="tag">v1.2.0 · INDEPENDENT WINDOW</span>
     </div>
   </header>
 
@@ -109,10 +110,11 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
 
   <section id="shots">
     <h2>界面</h2>
-    <p class="sub">深色像素工作室，左侧调参数，中间看画面，底部看状态。</p>
+    <p class="sub">深色像素工作室，左侧调参数，中间看画面，底部看状态；Windows 版运行在自己的窗口里。</p>
     <div class="shots">
       <figure class="shot"><img src="assets/pixel.png" alt="像素工坊"><figcaption>像素工坊 / 128 × 80 / 20 色</figcaption></figure>
       <figure class="shot"><img src="assets/clean.png" alt="去水印"><figcaption>去水印 / 画笔蒙版 / 内容识别修复</figcaption></figure>
+      <figure class="shot wide"><img src="assets/native.png" alt="PixelsUndo 独立桌面窗口"><figcaption>Windows 独立窗口 / 无浏览器地址栏 / 可拖动标题栏</figcaption></figure>
     </div>
   </section>
 
@@ -121,7 +123,7 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
     <p class="sub">在线版、Windows 桌面版、Android App，或者局域网手机版。</p>
     <div class="steps">
       <div class="step"><b>直接在线使用</b><p>打开 pixelsundo.onrender.com，上传图片即可开始。免费实例闲置会休眠，首次打开可能需要等 30 秒左右唤醒。</p></div>
-      <div class="step"><b>下载 Windows 版</b><p>解压后双击 PixelsUndo.exe，浏览器会自动打开。首次启动会在程序旁生成 data 目录。</p></div>
+      <div class="step"><b>下载 Windows 版</b><p>解压后双击“启动 PixelsUndo.bat”，会打开独立软件窗口，不跳浏览器。请保留 PixelsUndo-app 文件夹。</p></div>
       <div class="step"><b>手机添加到主屏幕</b><p>在线版用 iPhone Safari → 分享 → 添加到主屏幕；Android Chrome → 菜单 → 安装应用。局域网 HTTP 只是快捷方式，HTTPS 在线版才是可安装 PWA。</p></div>
       <div class="step"><b>Android App</b><p>下载 PixelsUndo-Android.apk 安装即可；它是对在线版的 WebView 封装，导出图片会保存到相册 Pictures/PixelsUndo。</p></div>
     </div>
@@ -129,12 +131,15 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
   </section>
 
   <footer>
-    <div>PixelsUndo v1.1.0 · For <b>StoneFish8</b><br><span class="mono">PYTHON · OPENCV · VANILLA JS</span></div>
+    <div>PixelsUndo v1.2.0 · For <b>StoneFish8</b><br><span class="mono">PYTHON · OPENCV · VANILLA JS</span></div>
     <div><a href="https://github.com/OStonefishO/PixelsUndo">github.com/OStonefishO/PixelsUndo</a><br><span class="mono">MIRROR · cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/</span></div>
   </footer>
 </div>
 </body>
 </html>
+
+
+
 
 
 

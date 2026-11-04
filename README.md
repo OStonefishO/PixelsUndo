@@ -1,4 +1,4 @@
-﻿# PixelsUndo
+# PixelsUndo
 
 **把照片折叠成像素，把水印擦成风景。**
 
@@ -6,11 +6,13 @@
 
 PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成可导出的像素画，一边用画笔/智能选取 + 内容识别修复擦掉水印。它有三种用法：**在线版**打开浏览器就能用；**Windows 版**全程在本机处理；**Android App** 是对在线版的封装，导出图片会存进相册。
 
-> **v1.1.0** · 新增色阶、精确颜色数量、内置检查更新、手机触控优化、在线版与 Android App，以及 **For StoneFish8** 专属头像。
+> **v1.2.0** · 新增独立原生窗口（不再是浏览器标签）、Android App、在线版、色阶、精确颜色数量、内置检查更新，以及 **For StoneFish8** 专属头像。
 
 | 像素工坊 | 去水印 |
 | --- | --- |
 | ![像素工坊](docs/screenshot-pixel.png) | ![去水印](docs/screenshot-clean.png) |
+
+![PixelsUndo 独立窗口](docs/screenshot-native.png)
 
 ![手机访问](docs/screenshot-phone.png)
 
@@ -22,13 +24,15 @@ PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成
 
 ## 下载 Windows 版
 
-打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 `PixelsUndo-Windows.zip`，解压后双击 **`PixelsUndo.exe`**。无需安装 Python，首次启动会在 exe 旁边创建 `data` 文件夹。
+打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 `PixelsUndo-Windows-1.2.0.zip`，解压后双击 **`启动 PixelsUndo.bat`**。它会打开一个独立的软件窗口（带标题栏，没有浏览器地址栏），不会跳到浏览器。
+
+> 启动器会把约 1 MB 的窗口宿主复制到 `%TEMP%` 再启动，以绕开 WebView2 对中文路径的限制；`PixelsUndo-app` 数据仍留在解压目录。请保持压缩包内目录结构完整，不要只复制 exe。
 
 > exe 没有购买代码签名证书。Windows SmartScreen 提示“已保护你的电脑”时，点“更多信息 → 仍要运行”；杀毒软件若误报，把解压目录加入信任即可。
 
 ## 下载 Android App
 
-打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 **`PixelsUndo-Android.apk`**，在手机上允许“安装未知应用”后安装。App 需要网络，打开的是在线版；导出时会把图片直接保存到相册 `Pictures/PixelsUndo`。
+打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 **`PixelsUndo-Android.apk`**，在手机上允许“安装未知应用”后安装。App 需要网络，打开的是在线版；导出时会把图片直接保存到相册 `Pictures/PixelsUndo`。当前 APK 为 v1.2.0。
 
 > APK 使用自签名调试证书，未上架应用商店；Android 可能提示“未经认证的应用”，选择继续安装即可。
 
@@ -37,7 +41,7 @@ PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成
 双击项目根目录下的 **`启动 PixelsUndo.bat`**。
 
 - 首次启动会自动创建 `.venv` 并安装 Pillow、NumPy、OpenCV、Segno（约 1–3 分钟，需联网一次）。
-- 之后每次双击会在后台启动本地服务，并自动打开浏览器；手机访问功能默认开启。
+- 源码模式仍会启动本地服务并打开浏览器（这是开发用入口）；发行版 zip 里的 `启动 PixelsUndo.bat` 才是独立窗口。
 - 关闭浏览器不会退出程序；需要彻底退出时，点右上角的电源按钮 → **退出程序**。
 - 如果浏览器没有自动弹出，手动访问 `http://127.0.0.1:8765`（端口被占用时程序会自动顺延）。
 
@@ -209,6 +213,7 @@ cd PixelsUndo
 ## 隐私
 
 所有图片仅保存在本机 `data/sessions`，不会上传到任何第三方服务。电脑端默认只监听本机；启动脚本会同时开启局域网访问，方便同一 Wi-Fi 下的手机使用。手机访问没有登录校验，退出程序后局域网入口随服务一起关闭。退出程序后可手动删除 `data/sessions` 清空记录。云端部署时请设置 `PIXELSUNDO_PASSWORD`，否则任何拿到网址的人都能使用该实例。
+
 
 
 

@@ -263,6 +263,40 @@
     });
   }
 
+  // Phones often upload 12–48 MP photos. Downscale before sending so the
+  // upload and the server's decode stay small; pixel art never needs that many.
+  async function prepareUpload(file) {
+    const MAX_DIM = 2400;
+    const MAX_BYTES = 2.2 * 1024 * 1024;
+    let bitmap = null;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    } catch (error) {
+      return fileToDataUrl(file);
+    }
+    const longest = Math.max(bitmap.width, bitmap.height);
+    if (longest <= MAX_DIM && file.size <= MAX_BYTES) {
+      if (bitmap.close) bitmap.close();
+      return fileToDataUrl(file);
+    }
+    const scale = Math.min(1, MAX_DIM / longest);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    if (bitmap.close) bitmap.close();
+
+    const toBlob = (type, quality) =>
+      new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+    let blob = await toBlob("image/webp", 0.9);
+    if (!blob) blob = await toBlob("image/jpeg", 0.9);
+    if (!blob) return fileToDataUrl(file);
+    return fileToDataUrl(blob);
+  }
+
   // ------------------------------------------------------------------ canvas
   function resizeCanvas() {
     const rect = els.stage.getBoundingClientRect();
@@ -690,9 +724,11 @@
       toast("请选择 JPG、PNG 或 WebP 图片", "error");
       return;
     }
-    showBusy("正在打开图片", file.name);
+    showBusy("正在读取图片", "手机照片会先压缩，上传更快…");
     try {
-      const dataUrl = await fileToDataUrl(file);
+      const dataUrl = await prepareUpload(file);
+      if (els.busyTitle) els.busyTitle.textContent = "正在打开图片";
+      if (els.busyText) els.busyText.textContent = file.name;
       const data = await api("/api/upload", { image: dataUrl, name: file.name });
       await loadSession(data.session);
       toast("图片已载入，开始调整吧");
@@ -1317,8 +1353,13 @@
         els.phoneQr.hidden = false;
         els.phoneHint.textContent = "手机与电脑连接同一个 Wi-Fi，用相机扫码即可打开。图片只在本机处理，不会上传。";
       } else {
-        els.phoneQr.removeAttribute("src");
-        els.phoneHint.textContent = "当前服务只监听本机。请通过「启动 PixelsUndo.bat」重新打开，手机会自动获得局域网地址。";
+        info.primary = "https://pixelsundo.onrender.com/";
+        info.online = true;
+        els.phoneUrl.textContent = info.primary;
+        qrWrap.hidden = false;
+        els.phoneQr.src = "/assets/online-qr.png";
+        els.phoneQr.hidden = false;
+        els.phoneHint.textContent = "桌面版只在本机运行。手机可以扫码直接打开在线版，或下载 Android App。";
       }
     } catch (error) {
       els.phoneUrl.textContent = "获取失败";
@@ -1677,6 +1718,7 @@
 
   async function init() {
     bindEvents();
+    setupOverlayEvents();
     updateParamLabels();
     state.brush = Number(els.brushSize.value);
     setTool("brush");
@@ -1707,6 +1749,9 @@
       await loadSample(demo);
       if (demo === "watermark") setMode("clean");
       fitView();
+    }
+    if (query.has("debug")) {
+      window.__PU = { state, screenToImage, isInsideImage, fitView, startStroke, moveStroke, endStroke, render };
     }
   }
 
