@@ -577,7 +577,10 @@ class PixelsUndoHandler(BaseHTTPRequestHandler):
         x = int(payload.get("x") or 0)
         y = int(payload.get("y") or 0)
         tolerance = int(payload.get("tolerance") or 40)
-        mask, count = repair.select_similar(image, x, y, tolerance=tolerance)
+        mask, count = repair.select_similar(
+            image, x, y, tolerance=tolerance,
+            global_mode=bool(payload.get("global")),
+        )
         if mask is None:
             raise ApiError("该位置没有可选取的区域")
         total = float(image.width * image.height)

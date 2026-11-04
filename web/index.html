@@ -263,6 +263,7 @@
             <div class="field-row compact"><label for="tolerance">颜色容差</label><output id="toleranceValue">40</output></div>
             <input class="range" id="tolerance" type="range" min="8" max="120" step="2" value="40" />
             <div class="hint">点击水印上的一块颜色，自动选中相连区域</div>
+            <label class="check-row"><input type="checkbox" id="wandGlobal" /> 全图同色（适合重复平铺水印）</label>
           </div>
         </section>
 
@@ -273,7 +274,8 @@
           </div>
           <div class="select-wrap">
             <select id="method">
-              <option value="telea">内容识别 · 推荐</option>
+              <option value="content" selected>内容识别 · 更自然（较慢）</option>
+              <option value="telea">快速扩散 · 秒出</option>
               <option value="ns">平滑扩散 · 柔和</option>
             </select>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 10l4 4 4-4"/></svg>

@@ -20,6 +20,9 @@ data/sessions/
 data/logs/
 data/runtime.json
 data/*.png
+data/*.jpg
+data/*.jpeg
+data/*.webp
 data/*.svg
 data/*.out
 data/*.err

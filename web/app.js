@@ -52,6 +52,7 @@
     brushValue: $("#brushValue"),
     tolerance: $("#tolerance"),
     toleranceValue: $("#toleranceValue"),
+    wandGlobal: $("#wandGlobal"),
     method: $("#method"),
     radius: $("#radius"),
     radiusValue: $("#radiusValue"),
@@ -912,6 +913,7 @@
         x: round(point.x),
         y: round(point.y),
         tolerance: Number(els.tolerance.value),
+        global: !!(els.wandGlobal && els.wandGlobal.checked),
       });
       const image = await loadImage(data.mask);
       state.maskCtx.drawImage(image, 0, 0, state.maskCanvas.width, state.maskCanvas.height);
@@ -941,7 +943,11 @@
       toast("请先涂抹或选取水印区域", "error");
       return;
     }
-    showBusy("正在修复画面", "读取周围像素并填补水印");
+    const slow = els.method.value === "content";
+    showBusy(
+      "正在修复画面",
+      slow ? "内容识别正在比对周围纹理，大片水印约需 10–30 秒…" : "读取周围像素并填补水印",
+    );
     const maskUrl = state.maskCanvas.toDataURL("image/png");
     try {
       const data = await api("/api/inpaint", {
@@ -1557,6 +1563,8 @@
       updateParamLabels();
     });
     els.tolerance.addEventListener("input", updateParamLabels);
+    els.radius.addEventListener("input", updateParamLabels);
+    els.radius.addEventListener("change", updateParamLabels);
     els.applyRepair.addEventListener("click", applyRepair);
     els.undoBase.addEventListener("click", () => stepHistory(-1));
     els.redoBase.addEventListener("click", () => stepHistory(1));
