@@ -20,6 +20,8 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 `PixelsUndo-Windows.zip`，解压后双击 **`PixelsUndo.exe`**。无需安装 Python，首次启动会在 exe 旁边创建 `data` 文件夹。
 
+> exe 没有购买代码签名证书。Windows SmartScreen 提示“已保护你的电脑”时，点“更多信息 → 仍要运行”；杀毒软件若误报，把解压目录加入信任即可。
+
 ## 快速开始（源码运行）
 
 双击项目根目录下的 **`启动 PixelsUndo.bat`**。
