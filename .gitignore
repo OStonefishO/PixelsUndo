@@ -1,6 +1,12 @@
 .venv/
 __pycache__/
 *.pyc
+build/
+build-debug/
+dist/
+dist-debug/
+PixelsUndo-Windows.zip
+PixelsUndo-crash.log
 data/sessions/
 data/logs/
 data/runtime.json
@@ -11,3 +17,4 @@ data/*.err
 data/edge-*/
 data/pip-unpack-*/
 wheels/
+web/qa-*.html

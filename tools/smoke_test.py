@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-BASE = "http://127.0.0.1:8765"
+BASE = os.environ.get("PIXELSUNDO_URL", "http://127.0.0.1:8765").rstrip("/")
 
 
 def post(path, payload, raw=False):

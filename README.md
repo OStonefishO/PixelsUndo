@@ -6,6 +6,8 @@
 
 PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照片变成可导出的像素画，一边用画笔/智能选取 + 内容识别修复擦掉水印。图片不会上传到任何服务器；电脑处理完成后，同一 Wi-Fi 下的手机也能直接打开继续用。
 
+> **v1.1.0** · 新增色阶、精确颜色数量、内置检查更新、手机触控优化，以及 **For StoneFish8** 专属头像页签。
+
 | 像素工坊 | 去水印 |
 | --- | --- |
 | ![像素工坊](docs/screenshot-pixel.png) | ![去水印](docs/screenshot-clean.png) |
@@ -14,7 +16,11 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 ---
 
-## 快速开始
+## 下载 Windows 版
+
+打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 `PixelsUndo-Windows.zip`，解压后双击 **`PixelsUndo.exe`**。无需安装 Python，首次启动会在 exe 旁边创建 `data` 文件夹。
+
+## 快速开始（源码运行）
 
 双击项目根目录下的 **`启动 PixelsUndo.bat`**。
 
@@ -28,7 +34,7 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 ## 手机访问
 
 1. 让手机和电脑连接 **同一个 Wi-Fi**。
-2. 在电脑浏览器里点右上角的 **手机图标**，弹出二维码和局域网地址。
+2. 在电脑浏览器里点右上角的 **二维码图标**，弹出二维码和局域网地址。
 3. 用手机相机扫码，或手动输入地址（例如 `http://192.168.1.20:8765`）。
 4. iOS/Android 浏览器菜单里可以 **添加到主屏幕**，像 App 一样全屏打开。
 
@@ -42,6 +48,29 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 > 手机访问没有账号密码，同一 Wi-Fi 下的设备都能打开。请只在可信网络使用，不要在路由器上把 8765 端口映射到公网。
 
+## 永久网址与镜像站
+
+项目主页（GitHub Pages，静态介绍页）会部署在：
+
+**https://ostonefisho.github.io/PixelsUndo/**
+
+这个地址是永久的，可以放在手机书签里；它负责介绍、截图和下载入口。因为去水印依赖 Python + OpenCV，GitHub Pages **不能**直接运行完整应用，完整在线版需要一台云主机。
+
+### 部署完整在线版（Render）
+
+1. 登录 [Render](https://render.com)，选择 **New → Blueprint**，连接本仓库。
+2. Render 会自动读取 `render.yaml` 和 `Dockerfile`，创建一个免费 Web Service。
+3. 部署完成后得到形如 `https://pixelsundo.onrender.com` 的永久 HTTPS 地址；手机可直接打开，也可“添加到主屏幕”。
+4. 建议在 Render 环境变量里设置 `PIXELSUNDO_PASSWORD`（自定义访问密码）。设置后浏览器会弹出登录框；`/api/health` 保持免密，供 Render 健康检查使用。
+
+免费实例会在闲置后休眠，第一次打开可能需要 30–60 秒唤醒；会话数据是临时的，重启即清空。
+
+### 镜像站（Railway / 第二个 Render 服务）
+
+仓库里的 `railway.json` + `Dockerfile` 可直接用于 [Railway](https://railway.com)：**New Project → Deploy from GitHub repo → 选择 PixelsUndo → Generate Domain**。也可以在同一 Render 账号再建一个 Web Service 指向同一仓库，作为独立域名的镜像。
+
+两份部署都建议设置不同的 `PIXELSUNDO_PASSWORD`。公开部署意味着任何拿到地址的人都能上传图片，请只分享给信任的人。
+
 ## 两个工作区
 
 ### 1. 像素工坊
@@ -51,9 +80,10 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 | 风格预设 | 手机墨、PICO-8、柔彩、黑白漫画，一键切换像素尺寸/配色/抖动 |
 | 像素尺寸 | 输出长边 16–512 px；越大细节越多，越小越“块” |
 | 配色方案 | 自动配色（中位切分）、Game Boy、PICO-8、Sweetie 16、棕褐胶片、黑白、保留原色 |
-| 色板数量 | 自动配色时的颜色数（2–64） |
+| 色板数量 | 自动配色时的颜色数（2–64），可输入数字或点 4/8/12/16/24/32/48/64 快捷色块 |
 | 抖动方式 | 无 / 有序（Bayer 4×4）/ 误差扩散（Floyd–Steinberg） |
 | 饱和度 / 对比度 / 亮度 | 量化前的画面微调 |
+| 色阶 | 输入黑场/白场、Gamma、输出黑场/白场五段控制；先拉色阶再量化，压暗部或提亮中间调更可控 |
 | 轮廓 | 为颜色边界加一圈深色描边，像素角色感更强 |
 
 调整会实时在服务端重新计算并回传预览；底部会显示实际输出尺寸、颜色数与耗时。
@@ -74,6 +104,14 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 - 去水印结果：导出修复后的原尺寸图片。
 - 文件名支持中文；PNG 无损，JPG/WebP 可调质量。
 
+## 检查更新
+
+状态栏右侧显示当前版本（如 `v1.1.0`），点一下会向 GitHub Releases 查询最新版本：
+
+- 有新版：按钮变成粉色 `更新 vX.Y.Z`，点开可看更新说明并跳转下载页。
+- 无新版或仓库还没有发布 Release：显示“当前已是最新开发版”。
+- 结果缓存 10 分钟；网络不可用时只提示失败，不影响本地功能。
+
 ## 快捷键
 
 | 按键 | 功能 |
@@ -92,17 +130,22 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 ```
 PixelsUndo/
-├─ 启动 PixelsUndo.bat   双击启动
+├─ 启动 PixelsUndo.bat   双击启动（源码版）
 ├─ 允许手机访问.bat      首次手机访问时放行 Windows 防火墙
+├─ PixelsUndo.exe        Release 里的免安装桌面版
 ├─ launcher.py           后台启动/复用服务并打开浏览器
-├─ server.py             本地 HTTP 服务与 API（含局域网二维码）
-├─ requirements.txt      固定依赖版本
+├─ desktop.py            桌面版入口（PyInstaller 打包用）
+├─ server.py             本地 HTTP 服务与 API（含局域网二维码、更新检查）
+├─ requirements.txt      Windows 源码运行依赖
+├─ requirements-deploy.txt  云端 Linux 部署依赖
+├─ Dockerfile / render.yaml / railway.json  永久在线版部署配置
 ├─ pixelsundo/
-│  ├─ engine.py          像素化、色板量化、抖动、描边
+│  ├─ engine.py          像素化、色阶、色板量化、抖动、描边
 │  └─ inpaint.py         蒙版处理、Telea/NS 修复、智能选取
 ├─ web/                  界面（HTML/CSS/JS，无前端构建）
 │  ├─ manifest.webmanifest  PWA 清单，可添加到手机主屏幕
-│  └─ assets/            图标
+│  └─ assets/            图标、头像
+├─ site/                 GitHub Pages 项目主页
 ├─ docs/                 界面截图
 ├─ tools/
 │  ├─ make_samples.py    重新生成示例图片
@@ -142,8 +185,8 @@ cd PixelsUndo
 
 仓库只包含源码、网页和示例图；`.venv`、会话记录与日志不会提交。
 
-> 这是一个带 Python 图像处理后端的本地应用，不能直接部署到 GitHub Pages。要在外网/手机上随时随地使用，需要把 `server.py` 部署到一台可访问的主机（并自行加登录保护），或改造成纯前端 WASM 版本。
+> 这是一个带 Python 图像处理后端的应用，不能直接跑在 GitHub Pages 上。永久在线版请用上面的 Render / Railway 部署配置；GitHub Pages 只承载 `site/` 介绍页。
 
 ## 隐私
 
-所有图片仅保存在本机 `data/sessions`，不会上传到任何第三方服务。电脑端默认只监听本机；启动脚本会同时开启局域网访问，方便同一 Wi-Fi 下的手机使用。手机访问没有登录校验，退出程序后局域网入口随服务一起关闭。退出程序后可手动删除 `data/sessions` 清空记录。
+所有图片仅保存在本机 `data/sessions`，不会上传到任何第三方服务。电脑端默认只监听本机；启动脚本会同时开启局域网访问，方便同一 Wi-Fi 下的手机使用。手机访问没有登录校验，退出程序后局域网入口随服务一起关闭。退出程序后可手动删除 `data/sessions` 清空记录。云端部署时请设置 `PIXELSUNDO_PASSWORD`，否则任何拿到网址的人都能使用该实例。

@@ -62,7 +62,20 @@
     paletteNote: $("#paletteNote"),
     colorsGroup: $("#colorsGroup"),
     colors: $("#colors"),
-    colorsValue: $("#colorsValue"),
+    colorsNumber: $("#colorsNumber"),
+    colorChips: $("#colorChips"),
+    colorChips: $("#colorChips"),
+    levelBlack: $("#levelBlack"),
+    levelWhite: $("#levelWhite"),
+    levelGamma: $("#levelGamma"),
+    levelOutBlack: $("#levelOutBlack"),
+    levelOutWhite: $("#levelOutWhite"),
+    levelBlackValue: $("#levelBlackValue"),
+    levelWhiteValue: $("#levelWhiteValue"),
+    levelGammaValue: $("#levelGammaValue"),
+    levelOutBlackValue: $("#levelOutBlackValue"),
+    levelOutWhiteValue: $("#levelOutWhiteValue"),
+    resetLevels: $("#resetLevels"),
     pixels: $("#pixels"),
     pixelValue: $("#pixelValue"),
     outSize: $("#outSize"),
@@ -106,6 +119,18 @@
     closePhoneFoot: $("#closePhoneFoot"),
     copyPhoneUrl: $("#copyPhoneUrl"),
     openPhoneUrl: $("#openPhoneUrl"),
+    updateBtn: $("#updateBtn"),
+    versionLabel: $("#versionLabel"),
+    updateModal: $("#updateModal"),
+    closeUpdate: $("#closeUpdate"),
+    updateRecheck: $("#updateRecheck"),
+    openRelease: $("#openRelease"),
+    updateMark: $("#updateMark"),
+    updateCurrent: $("#updateCurrent"),
+    updateStatus: $("#updateStatus"),
+    updateNotes: $("#updateNotes"),
+    updateLatest: $("#updateLatest"),
+    updateNotesText: $("#updateNotesText"),
   };
 
   const vctx = els.view.getContext("2d");
@@ -120,6 +145,11 @@
     contrast: 1.04,
     brightness: 1.0,
     outline: 0.22,
+    level_black: 0,
+    level_white: 1,
+    level_gamma: 1,
+    level_out_black: 0,
+    level_out_white: 1,
   };
 
   const PRESETS = {
@@ -447,12 +477,17 @@
       contrast: Number(els.contrast.value) / 100,
       brightness: Number(els.brightness.value) / 100,
       outline: Number(els.outline.value) / 100,
+      level_black: Number(els.levelBlack.value) / 255,
+      level_white: Number(els.levelWhite.value) / 255,
+      level_gamma: Number(els.levelGamma.value) / 100,
+      level_out_black: Number(els.levelOutBlack.value) / 255,
+      level_out_white: Number(els.levelOutWhite.value) / 255,
     };
   }
 
   function updateParamLabels() {
     els.pixelValue.textContent = `${els.pixels.value} px`;
-    els.colorsValue.textContent = els.colors.value;
+    els.colorsNumber.value = els.colors.value;
     els.saturationValue.textContent = `${els.saturation.value}%`;
     els.contrastValue.textContent = `${els.contrast.value}%`;
     els.brightnessValue.textContent = `${els.brightness.value}%`;
@@ -460,6 +495,11 @@
     els.brushValue.textContent = `${els.brushSize.value} px`;
     els.toleranceValue.textContent = els.tolerance.value;
     els.radiusValue.textContent = `${els.radius.value} px`;
+    els.levelBlackValue.textContent = els.levelBlack.value;
+    els.levelWhiteValue.textContent = els.levelWhite.value;
+    els.levelGammaValue.textContent = (Number(els.levelGamma.value) / 100).toFixed(2);
+    els.levelOutBlackValue.textContent = els.levelOutBlack.value;
+    els.levelOutWhiteValue.textContent = els.levelOutWhite.value;
 
     const notes = {
       auto: "Median Cut",
@@ -476,13 +516,18 @@
     $$("#sizeChips button").forEach((btn) => {
       btn.classList.toggle("is-active", Number(btn.dataset.size) === Number(els.pixels.value));
     });
+    $$("#colorChips button").forEach((btn) => {
+      btn.classList.toggle("is-active", Number(btn.dataset.colors) === Number(els.colors.value));
+    });
     $$("#ditherGroup button").forEach((btn) => {
       const active = btn.dataset.dither === ($$("#ditherGroup .is-active")[0]?.dataset.dither || "none");
       btn.classList.toggle("is-active", active);
     });
 
     updateEstimate();
-    [els.pixels, els.colors, els.saturation, els.contrast, els.brightness, els.outline, els.brushSize, els.tolerance, els.radius].forEach(paintRange);
+    [els.pixels, els.colors, els.saturation, els.contrast, els.brightness, els.outline,
+      els.levelBlack, els.levelWhite, els.levelGamma, els.levelOutBlack, els.levelOutWhite,
+      els.brushSize, els.tolerance, els.radius].forEach(paintRange);
   }
 
   function updateEstimate() {
@@ -503,6 +548,11 @@
     els.contrast.value = round(params.contrast * 100);
     els.brightness.value = round(params.brightness * 100);
     els.outline.value = round(params.outline * 100);
+    if (params.level_black !== undefined) els.levelBlack.value = round(params.level_black * 255);
+    if (params.level_white !== undefined) els.levelWhite.value = round(params.level_white * 255);
+    if (params.level_gamma !== undefined) els.levelGamma.value = round(params.level_gamma * 100);
+    if (params.level_out_black !== undefined) els.levelOutBlack.value = round(params.level_out_black * 255);
+    if (params.level_out_white !== undefined) els.levelOutWhite.value = round(params.level_out_white * 255);
     $$("#ditherGroup button").forEach((btn) => btn.classList.toggle("is-active", btn.dataset.dither === params.dither));
     updateParamLabels();
   }
@@ -526,6 +576,26 @@
   function markManual() {
     $$(".preset-card").forEach((card) => card.classList.remove("is-active"));
     state.dirtyParams = true;
+  }
+
+  function setColorCount(value) {
+    const next = clamp(Math.round(Number(value) || 20), 2, 64);
+    els.colors.value = String(next);
+    els.colorsNumber.value = String(next);
+    markManual();
+    updateParamLabels();
+    scheduleProcess();
+  }
+
+  function resetLevels() {
+    els.levelBlack.value = "0";
+    els.levelWhite.value = "255";
+    els.levelGamma.value = "100";
+    els.levelOutBlack.value = "0";
+    els.levelOutWhite.value = "255";
+    markManual();
+    updateParamLabels();
+    scheduleProcess(true);
   }
 
   // --------------------------------------------------------------- pixel flow
@@ -1258,6 +1328,72 @@
     area.remove();
   }
 
+  // ------------------------------------------------------------------- update
+  let updateInfo = null;
+  let updateCheckedAt = 0;
+
+  function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
+
+  function renderUpdate() {
+    if (!updateInfo) return;
+    const current = updateInfo.current || "1.1.0";
+    els.versionLabel.textContent = `v${current}`;
+    els.updateCurrent.textContent = `v${current}`;
+    els.updateMark.textContent = current.split(".").slice(0, 2).join(".");
+    if (!updateInfo.ok) {
+      els.updateStatus.textContent = updateInfo.message || "检查更新失败，请稍后再试";
+      els.updateBtn.classList.remove("has-update");
+      els.openRelease.disabled = true;
+      els.updateNotes.hidden = true;
+      return;
+    }
+    if (updateInfo.has_update) {
+      els.updateStatus.textContent = `发现新版本 v${updateInfo.latest}`;
+      els.updateLatest.textContent = formatDate(updateInfo.published_at);
+      els.updateNotesText.textContent = updateInfo.notes || "作者暂未填写更新说明。";
+      els.updateNotes.hidden = false;
+      els.updateBtn.classList.add("has-update");
+      els.updateBtn.querySelector("#updateText").textContent = `更新 v${updateInfo.latest}`;
+      els.openRelease.disabled = false;
+    } else {
+      els.updateStatus.textContent = "已是最新版本";
+      els.updateNotes.hidden = true;
+      els.updateBtn.classList.remove("has-update");
+      els.updateBtn.querySelector("#updateText").textContent = "检查更新";
+      els.openRelease.disabled = false;
+    }
+  }
+
+  async function checkForUpdate(force = false) {
+    if (els.updateStatus) els.updateStatus.textContent = "正在连接 GitHub…";
+    els.updateRecheck.disabled = true;
+    try {
+      const response = await fetch(`/api/update${force ? "?force=1" : ""}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!data.ok) throw new Error(data.error || "检查更新失败");
+      updateInfo = data.update;
+      updateCheckedAt = Date.now();
+      renderUpdate();
+    } catch (error) {
+      els.updateStatus.textContent = "检查更新失败，请检查网络连接";
+      els.updateBtn.classList.remove("has-update");
+      els.openRelease.disabled = true;
+    } finally {
+      els.updateRecheck.disabled = false;
+    }
+  }
+
+  function openUpdate() {
+    els.updateModal.hidden = false;
+    if (!updateInfo || Date.now() - updateCheckedAt > 600000) checkForUpdate(false);
+    else renderUpdate();
+  }
+
   // ------------------------------------------------------------------- wiring
   function bindEvents() {
     els.openBtn.addEventListener("click", () => els.fileInput.click());
@@ -1285,6 +1421,17 @@
     });
     els.phoneQr.addEventListener("error", () => { els.phoneQr.hidden = true; });
 
+    els.updateBtn.addEventListener("click", openUpdate);
+    els.closeUpdate.addEventListener("click", () => { els.updateModal.hidden = true; });
+    els.updateModal.addEventListener("pointerdown", (event) => {
+      if (event.target === els.updateModal) els.updateModal.hidden = true;
+    });
+    els.updateRecheck.addEventListener("click", () => checkForUpdate(true));
+    els.openRelease.addEventListener("click", () => {
+      const url = (updateInfo && updateInfo.url) || "https://github.com/OStonefishO/PixelsUndo/releases/latest";
+      window.open(url, "_blank", "noopener");
+    });
+
     els.fileInput.addEventListener("change", (event) => {
       const file = event.target.files && event.target.files[0];
       if (file) uploadFile(file);
@@ -1305,10 +1452,24 @@
       });
     });
     els.palette.addEventListener("change", () => { markManual(); updateParamLabels(); scheduleProcess(); });
-    els.colors.addEventListener("input", () => { markManual(); updateParamLabels(); scheduleProcess(); });
+    els.colors.addEventListener("input", () => {
+      els.colorsNumber.value = els.colors.value;
+      markManual();
+      updateParamLabels();
+      scheduleProcess();
+    });
+    els.colorsNumber.addEventListener("change", () => setColorCount(els.colorsNumber.value));
+    els.colorChips.addEventListener("click", (event) => {
+      const btn = event.target.closest("button[data-colors]");
+      if (btn) setColorCount(btn.dataset.colors);
+    });
     [els.saturation, els.contrast, els.brightness, els.outline].forEach((input) => {
       input.addEventListener("input", () => { markManual(); updateParamLabels(); scheduleProcess(); });
     });
+    [els.levelBlack, els.levelWhite, els.levelGamma, els.levelOutBlack, els.levelOutWhite].forEach((input) => {
+      input.addEventListener("input", () => { markManual(); updateParamLabels(); scheduleProcess(); });
+    });
+    els.resetLevels.addEventListener("click", resetLevels);
     $$("#ditherGroup button").forEach((btn) => {
       btn.addEventListener("click", () => {
         $$("#ditherGroup button").forEach((other) => other.classList.toggle("is-active", other === btn));
@@ -1420,6 +1581,7 @@
         els.exportModal.hidden = true;
         els.quitModal.hidden = true;
         els.phoneModal.hidden = true;
+        els.updateModal.hidden = true;
         return;
       }
       if (typing) return;
@@ -1499,9 +1661,14 @@
     try {
       const health = await fetch("/api/health").then((response) => response.json());
       els.statusEngine.textContent = health.opencv ? "PIXELSUNDO · OPENCV" : "PIXELSUNDO · NUMPY";
+      if (health.version) {
+        els.versionLabel.textContent = `v${health.version}`;
+        els.updateCurrent.textContent = `v${health.version}`;
+      }
     } catch (error) {
       els.statusEngine.textContent = "PIXELSUNDO";
     }
+    checkForUpdate(false);
     // First-run nudge after the empty state settles.
     window.setTimeout(() => {
       if (!state.session) els.statusMessage.textContent = "等待打开图片";

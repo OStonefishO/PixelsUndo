@@ -90,6 +90,22 @@ def auto_palette(image: Image.Image, count: int) -> List[Tuple[int, int, int]]:
         colors.append((raw[i], raw[i + 1], raw[i + 2]))
     if len(colors) < 2:
         colors = [(0, 0, 0), (255, 255, 255)]
+
+    # Median cut can return fewer slots than requested on flat images. Fill the
+    # remaining slots with frequent source colours so "20 colours" really means
+    # up to 20 distinct tones whenever the image has them.
+    if len(colors) < count:
+        arr = np.asarray(probe.convert("RGB"), dtype=np.uint8).reshape(-1, 3)
+        uniq, counts = np.unique(arr, axis=0, return_counts=True)
+        order = np.argsort(-counts)
+        existing = np.asarray(colors, dtype=np.float32)
+        for index in order:
+            candidate = tuple(int(v) for v in uniq[index])
+            if not np.any(np.sum((existing - np.asarray(candidate, np.float32)) ** 2, axis=1) < 36):
+                colors.append(candidate)
+                existing = np.asarray(colors, dtype=np.float32)
+            if len(colors) >= count:
+                break
     return colors
 
 
@@ -176,8 +192,31 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+def _apply_levels(image: Image.Image, black: float, white: float, gamma: float,
+                  out_black: float, out_white: float) -> Image.Image:
+    """Remap input tones, then gamma, then output range (Photoshop-style levels)."""
+    if (black <= 0.001 and white >= 0.999 and abs(gamma - 1.0) < 0.001
+            and out_black <= 0.001 and out_white >= 0.999):
+        return image
+    arr = np.asarray(image.convert("RGB"), dtype=np.float32) / 255.0
+    span = max(0.004, white - black)
+    arr = np.clip((arr - black) / span, 0.0, 1.0)
+    if abs(gamma - 1.0) >= 0.001:
+        arr = np.power(arr, 1.0 / max(0.05, gamma))
+    arr = out_black + arr * max(0.0, out_white - out_black)
+    return Image.fromarray(np.clip(arr * 255.0, 0, 255).astype(np.uint8), "RGB")
+
+
 def normalize_params(params: Optional[dict]) -> dict:
     params = dict(params or {})
+    level_black = _clamp(float(params.get("level_black", 0.0)), 0.0, 0.98)
+    level_white = _clamp(float(params.get("level_white", 1.0)), 0.02, 1.0)
+    if level_white <= level_black + 0.01:
+        level_white = min(1.0, level_black + 0.01)
+    out_black = _clamp(float(params.get("level_out_black", 0.0)), 0.0, 1.0)
+    out_white = _clamp(float(params.get("level_out_white", 1.0)), 0.0, 1.0)
+    if out_white < out_black:
+        out_white = out_black
     return {
         "pixels": int(_clamp(float(params.get("pixels", 128)), 16, 512)),
         "palette": str(params.get("palette", "auto")),
@@ -187,6 +226,11 @@ def normalize_params(params: Optional[dict]) -> dict:
         "contrast": _clamp(float(params.get("contrast", 1.04)), 0.5, 2.0),
         "brightness": _clamp(float(params.get("brightness", 1.0)), 0.4, 1.8),
         "outline": _clamp(float(params.get("outline", 0.22)), 0.0, 1.0),
+        "level_black": level_black,
+        "level_white": level_white,
+        "level_gamma": _clamp(float(params.get("level_gamma", 1.0)), 0.2, 3.0),
+        "level_out_black": out_black,
+        "level_out_white": out_white,
     }
 
 
@@ -205,6 +249,10 @@ def pixelate(image: Image.Image, params: Optional[dict] = None) -> Tuple[Image.I
     out_h = max(1, int(round(height * ratio)))
 
     small = image.resize((out_w, out_h), RESAMPLE_LANCZOS)
+    small = _apply_levels(
+        small, cfg["level_black"], cfg["level_white"], cfg["level_gamma"],
+        cfg["level_out_black"], cfg["level_out_white"],
+    )
     small = ImageEnhance.Color(small).enhance(cfg["saturation"])
     small = ImageEnhance.Contrast(small).enhance(cfg["contrast"])
     small = ImageEnhance.Brightness(small).enhance(cfg["brightness"])

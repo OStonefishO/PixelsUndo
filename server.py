@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hmac
 import io
 import json
 import logging
@@ -18,6 +19,7 @@ import os
 import re
 import shutil
 import socket
+import sys
 import threading
 import time
 import uuid
@@ -25,6 +27,8 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
+from urllib import error as urlerror
+from urllib import request as urlrequest
 from urllib.parse import quote, unquote, urlparse
 
 from PIL import Image, ImageOps
@@ -38,9 +42,11 @@ from pixelsundo import __version__
 from pixelsundo import engine
 from pixelsundo import inpaint as repair
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+FROZEN = bool(getattr(sys, "frozen", False))
+APP_HOME = Path(sys.executable).resolve().parent if FROZEN else ROOT
 WEB_DIR = ROOT / "web"
-DATA_DIR = ROOT / "data"
+DATA_DIR = APP_HOME / "data"
 SESSION_DIR = DATA_DIR / "sessions"
 SAMPLE_DIR = DATA_DIR / "samples"
 LOG_DIR = DATA_DIR / "logs"
@@ -48,9 +54,22 @@ MAX_BODY = 120 * 1024 * 1024
 MAX_SOURCE_SIDE = 6000
 PREVIEW_SIDE = 1600
 SESSION_RE = re.compile(r"^[a-f0-9]{32}$")
+ACCESS_PASSWORD = os.environ.get("PIXELSUNDO_PASSWORD", "").strip()
 
 for directory in (DATA_DIR, SESSION_DIR, SAMPLE_DIR, LOG_DIR):
     directory.mkdir(parents=True, exist_ok=True)
+
+# In a PyInstaller bundle the sample photos live in the read-only _MEIPASS
+# folder; copy them next to the exe on first run so the UI can load them.
+_bundled_samples = ROOT / "data" / "samples"
+if _bundled_samples.is_dir() and _bundled_samples.resolve() != SAMPLE_DIR.resolve():
+    for sample in _bundled_samples.glob("*.png"):
+        target = SAMPLE_DIR / sample.name
+        if not target.exists():
+            try:
+                shutil.copy2(str(sample), str(target))
+            except OSError:
+                pass
 
 
 def lan_addresses():
@@ -93,13 +112,76 @@ def network_info(bound_host, port):
         "port": port,
     }
 
+
+GITHUB_REPO = "OStonefishO/PixelsUndo"
+RELEASES_URL = "https://github.com/%s/releases/latest" % GITHUB_REPO
+UPDATE_API = "https://api.github.com/repos/%s/releases/latest" % GITHUB_REPO
+_update_cache = {"at": 0.0, "payload": None}
+
+
+def _version_tuple(value: str):
+    parts = []
+    for chunk in str(value).lstrip("vV").split("."):
+        digits = "".join(ch for ch in chunk if ch.isdigit())
+        parts.append(int(digits or 0))
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts[:3])
+
+
+def check_update(force: bool = False) -> dict:
+    """Ask GitHub for the newest release, caching for ten minutes."""
+    now = time.time()
+    if not force and _update_cache["payload"] and now - _update_cache["at"] < 600:
+        return _update_cache["payload"]
+    payload = {
+        "ok": True,
+        "current": __version__,
+        "latest": __version__,
+        "has_update": False,
+        "url": RELEASES_URL,
+        "notes": "",
+        "published_at": "",
+        "source": "github",
+    }
+    request = urlrequest.Request(
+        UPDATE_API,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "PixelsUndo/" + __version__,
+        },
+    )
+    try:
+        with urlrequest.urlopen(request, timeout=6) as response:
+            data = json.loads(response.read().decode("utf-8", "replace"))
+        latest = str(data.get("tag_name") or data.get("name") or "").strip()
+        if latest:
+            payload["latest"] = latest.lstrip("vV")
+            payload["has_update"] = _version_tuple(payload["latest"]) > _version_tuple(__version__)
+        payload["url"] = data.get("html_url") or RELEASES_URL
+        payload["notes"] = str(data.get("body") or "")[:4000]
+        payload["published_at"] = str(data.get("published_at") or "")
+    except urlerror.HTTPError as exc:
+        if exc.code == 404:
+            payload["message"] = "还没有发布版本，当前已是最新开发版。"
+        else:
+            payload["ok"] = False
+            payload["message"] = "检查更新失败（HTTP %d）" % exc.code
+    except Exception as exc:
+        payload["ok"] = False
+        payload["message"] = "无法连接 GitHub：%s" % exc
+    _update_cache["at"] = now
+    _update_cache["payload"] = payload
+    return payload
+
+_log_handlers = [logging.FileHandler(str(LOG_DIR / "server.log"), encoding="utf-8")]
+if sys.stderr is not None:
+    _log_handlers.append(logging.StreamHandler())
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-7s %(message)s",
-    handlers=[
-        logging.FileHandler(str(LOG_DIR / "server.log"), encoding="utf-8"),
-        logging.StreamHandler(),
-    ],
+    handlers=_log_handlers,
 )
 LOG = logging.getLogger("pixelsundo")
 
@@ -303,19 +385,55 @@ class PixelsUndoHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _authorized(self) -> bool:
+        if not ACCESS_PASSWORD:
+            return True
+        if urlparse(self.path).path == "/api/health":
+            return True
+        header = self.headers.get("Authorization", "")
+        if not header.startswith("Basic "):
+            return False
+        try:
+            decoded = base64.b64decode(header[6:].strip()).decode("utf-8")
+        except Exception:
+            return False
+        _, _, password = decoded.partition(":")
+        return hmac.compare_digest(password, ACCESS_PASSWORD)
+
+    def _send_auth_required(self) -> None:
+        body = "PixelsUndo 需要访问密码".encode("utf-8")
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="PixelsUndo"')
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     # -------------------------------------------------------------------- GET
     def do_GET(self) -> None:  # noqa: N802
+        if not self._authorized():
+            self._send_auth_required()
+            return
         parsed = urlparse(self.path)
         route = unquote(parsed.path)
         if route in ("/", "/index.html"):
             self._serve_file(WEB_DIR / "index.html")
             return
         if route == "/api/health":
+            host, port = self.server.server_address[:2]
+            net = network_info(host, port)
             self._send_json({
                 "ok": True,
                 "version": __version__,
                 "opencv": repair.has_opencv(),
+                "lan": net["lan"],
+                "lanUrl": net["primary"] if net["lan"] else "",
             })
+            return
+        if route == "/api/update":
+            query = parsed.query or ""
+            force = "force=1" in query or "force=true" in query
+            self._send_json({"ok": True, "update": check_update(force)})
             return
         if route == "/api/network":
             host, port = self.server.server_address[:2]
@@ -351,6 +469,9 @@ class PixelsUndoHandler(BaseHTTPRequestHandler):
 
     # ------------------------------------------------------------------- POST
     def do_POST(self) -> None:  # noqa: N802
+        if not self._authorized():
+            self._send_auth_required()
+            return
         route = urlparse(self.path).path
         try:
             if route == "/api/upload":
@@ -536,13 +657,13 @@ def find_port(preferred: int = 8765, host: str = "127.0.0.1") -> int:
     raise RuntimeError("找不到可用端口")
 
 
-def main() -> None:
+def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="PixelsUndo local server")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--host", default="", help="bind address (default 127.0.0.1)")
     parser.add_argument("--lan", action="store_true", help="allow phones on the same Wi-Fi")
     parser.add_argument("--no-browser", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     host = args.host or ("0.0.0.0" if args.lan else "127.0.0.1")
     cleanup_sessions()

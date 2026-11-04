@@ -24,8 +24,9 @@
       </div>
       <div class="brand-copy">
         <div class="brand-name">Pixels<span>Undo</span></div>
-        <div class="brand-sub">像素画工作室 · 水印修复</div>
+        <div class="brand-sub">像素画工作室 · <b>For StoneFish8</b></div>
       </div>
+      <img class="brand-avatar" src="/assets/avatar.png" alt="StoneFish8 的头像" title="For StoneFish8" />
     </div>
 
     <nav class="mode-switch" id="modeSwitch" aria-label="工作模式">
@@ -60,6 +61,15 @@
 
   <main class="shell">
     <aside class="sidebar">
+      <div class="dedication" aria-label="定制信息">
+        <img src="/assets/avatar.png" alt="StoneFish8 的头像" />
+        <div class="dedication-copy">
+          <span>THIS EDITION IS FOR</span>
+          <strong>StoneFish8</strong>
+        </div>
+        <span class="dedication-badge">专属</span>
+      </div>
+
       <!-- Pixel controls -->
       <div id="pixelPanel" class="panel-stack">
         <div class="panel-intro">
@@ -123,9 +133,19 @@
           <div class="sub-control" id="colorsGroup">
             <div class="field-row compact">
               <label class="field-label" for="colors">色板数量</label>
-              <output id="colorsValue">20</output>
+              <span class="color-number"><input id="colorsNumber" type="number" min="2" max="64" step="1" value="20" inputmode="numeric" /><small>色</small></span>
             </div>
-            <input class="range" id="colors" type="range" min="2" max="48" step="1" value="20" />
+            <input class="range" id="colors" type="range" min="2" max="64" step="1" value="20" />
+            <div class="quick-chips color-chips" id="colorChips">
+              <button data-colors="4" type="button">4</button>
+              <button data-colors="8" type="button">8</button>
+              <button data-colors="12" type="button">12</button>
+              <button data-colors="16" type="button">16</button>
+              <button data-colors="24" type="button">24</button>
+              <button data-colors="32" type="button">32</button>
+              <button data-colors="48" type="button">48</button>
+              <button data-colors="64" type="button">64</button>
+            </div>
           </div>
         </section>
 
@@ -159,6 +179,35 @@
             <div class="field-row compact"><label for="outline">轮廓强化</label><output id="outlineValue">22%</output></div>
             <input class="range slim" id="outline" type="range" min="0" max="100" step="1" value="22" />
           </div>
+        </section>
+
+        <section class="control-section levels-section">
+          <div class="section-head">
+            <span>色阶调整</span>
+            <button class="mini-reset" id="resetLevels" type="button">复位</button>
+          </div>
+          <div class="level-bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="mini-slider">
+            <div class="field-row compact"><label for="levelBlack">输入黑场</label><output id="levelBlackValue">0</output></div>
+            <input class="range slim" id="levelBlack" type="range" min="0" max="120" step="1" value="0" />
+          </div>
+          <div class="mini-slider">
+            <div class="field-row compact"><label for="levelWhite">输入白场</label><output id="levelWhiteValue">255</output></div>
+            <input class="range slim" id="levelWhite" type="range" min="135" max="255" step="1" value="255" />
+          </div>
+          <div class="mini-slider">
+            <div class="field-row compact"><label for="levelGamma">中间调 Gamma</label><output id="levelGammaValue">1.00</output></div>
+            <input class="range slim" id="levelGamma" type="range" min="20" max="300" step="1" value="100" />
+          </div>
+          <div class="mini-slider">
+            <div class="field-row compact"><label for="levelOutBlack">输出黑场</label><output id="levelOutBlackValue">0</output></div>
+            <input class="range slim" id="levelOutBlack" type="range" min="0" max="100" step="1" value="0" />
+          </div>
+          <div class="mini-slider">
+            <div class="field-row compact"><label for="levelOutWhite">输出白场</label><output id="levelOutWhiteValue">255</output></div>
+            <input class="range slim" id="levelOutWhite" type="range" min="155" max="255" step="1" value="255" />
+          </div>
+          <p class="section-hint">先定黑白场，再用 Gamma 提亮中间调；输出范围可压出哑光质感。</p>
         </section>
 
         <div class="panel-actions">
@@ -342,6 +391,9 @@
           <span id="statusDims">—</span>
         </div>
         <div class="status-right">
+          <button class="status-update" id="updateBtn" type="button" title="检查新版本">
+            <b id="versionLabel">v1.1.0</b><span id="updateText">检查更新</span>
+          </button>
           <span class="status-engine" id="statusEngine">PixelsUndo Engine</span>
           <span class="status-dot"></span>
           <span id="statusMessage">就绪</span>
@@ -428,6 +480,36 @@
     </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" id="closePhoneFoot" type="button">知道了</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="updateModal" hidden>
+  <div class="modal modal-small" role="dialog" aria-modal="true" aria-labelledby="updateTitle">
+    <div class="modal-head">
+      <div><div class="eyebrow">UPDATES</div><h2 id="updateTitle">检查更新</h2></div>
+      <button class="icon-btn" id="closeUpdate" type="button" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body update-body">
+      <div class="update-hero">
+        <div class="update-mark" id="updateMark">1.1</div>
+        <div>
+          <span class="update-kicker">CURRENT VERSION</span>
+          <b id="updateCurrent">v1.1.0</b>
+          <small id="updateStatus">正在连接 GitHub…</small>
+        </div>
+      </div>
+      <div class="update-notes" id="updateNotes" hidden>
+        <div class="field-row compact"><span class="field-label">新版本内容</span><span class="field-note" id="updateLatest"></span></div>
+        <pre id="updateNotesText"></pre>
+      </div>
+      <p class="modal-copy" id="updateHint">更新会从 GitHub Releases 获取，不会上传任何图片。</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="updateRecheck" type="button">重新检查</button>
+      <button class="btn btn-primary" id="openRelease" type="button" disabled>打开发布页</button>
     </div>
   </div>
 </div>

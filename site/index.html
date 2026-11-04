@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PixelsUndo — 把照片折叠成像素，把水印擦回画面</title>
+<meta name="description" content="PixelsUndo 是一款本地运行的像素画工作室：照片转像素画、色阶与调色板控制、画笔去水印、手机扫码使用。">
+<meta name="theme-color" content="#0a0d07">
+<link rel="icon" href="assets/icon.png">
+<style>
+:root{--bg:#080b07;--panel:#0e130c;--line:#242c1e;--text:#e8eddf;--muted:#9aa48d;--lime:#c8ff5e;--pink:#ff5c8f;--mono:"Cascadia Code","SFMono-Regular",Consolas,monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(900px 500px at 80% -10%,#23320d 0%,transparent 60%),var(--bg);color:var(--text);font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;line-height:1.7}
+a{color:inherit}
+.wrap{width:min(1120px,calc(100% - 40px));margin:0 auto}
+nav{display:flex;align-items:center;justify-content:space-between;gap:18px;height:74px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em}
+.brand img{width:34px;height:34px;border-radius:8px}
+.brand small{display:block;font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;letter-spacing:.12em}
+.navlinks{display:flex;gap:22px;font-size:13px;color:var(--muted)}
+.navlinks a{text-decoration:none}.navlinks a:hover{color:var(--lime)}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:54px;align-items:center;padding:76px 0 68px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--lime);border:1px solid #35451f;background:#121a0b;padding:6px 10px;border-radius:999px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime)}
+h1{font-size:clamp(38px,5.2vw,64px);line-height:1.08;letter-spacing:-.03em;margin:20px 0 18px}
+h1 em{font-style:normal;color:var(--lime)}
+.lead{font-size:15px;color:var(--muted);max-width:520px;margin:0 0 28px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:9px;text-decoration:none;font-weight:700;font-size:13px;border:1px solid var(--line);transition:.18s}
+.btn.primary{background:var(--lime);color:#0b1004;border-color:var(--lime)}
+.btn.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.ghost:hover{border-color:#4b5b36;background:#12180d}
+.hero-card{position:relative;border:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,#11170d,#0a0d08);padding:10px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.hero-card img{display:block;width:100%;border-radius:11px}
+.tag{position:absolute;left:22px;bottom:-13px;background:#10170b;border:1px solid #35451f;color:var(--lime);font-family:var(--mono);font-size:9px;letter-spacing:.12em;padding:7px 10px;border-radius:999px}
+.dedication{display:flex;align-items:center;gap:12px;margin:22px 0 0;padding:10px 14px;border:1px solid #2a361f;border-radius:12px;background:#0d1309;width:max-content;max-width:100%}
+.dedication img{width:36px;height:36px;border-radius:9px;border:1px solid #4c5f32}
+.dedication span{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--muted);display:block}
+.dedication strong{font-size:14px;color:var(--lime)}
+section{padding:64px 0;border-top:1px solid var(--line)}
+h2{font-size:26px;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 30px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:20px}
+.card .ico{width:34px;height:34px;border-radius:9px;background:#1a2411;border:1px solid #33401f;display:grid;place-items:center;color:var(--lime);font-family:var(--mono);font-size:13px;margin-bottom:14px}
+.card h3{font-size:14px;margin:0 0 8px}
+.card p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.75}
+.shots{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.shot{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0b0f08}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{padding:10px 14px;font-family:var(--mono);font-size:10px;color:var(--muted);border-top:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;counter-reset:s}
+.step{border:1px solid var(--line);border-radius:12px;padding:16px;background:#0b1008}
+.step:before{counter-increment:s;content:"0" counter(s);font-family:var(--mono);font-size:10px;color:var(--lime);letter-spacing:.1em}
+.step b{display:block;font-size:13px;margin:6px 0 4px}
+.step p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.7}
+.note{border:1px solid #3b2a1a;background:#171107;border-radius:12px;padding:16px 18px;color:#d8c9a8;font-size:12.5px;margin-top:22px}
+footer{border-top:1px solid var(--line);padding:30px 0 46px;color:var(--muted);font-size:11.5px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+footer .mono{font-family:var(--mono);letter-spacing:.06em}
+@media(max-width:860px){.hero{grid-template-columns:1fr;gap:34px;padding-top:48px}.grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.navlinks{display:none}h1{font-size:40px}}
+@media(max-width:560px){.grid,.shots{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.wrap{width:calc(100% - 28px)}.hero{padding:38px 0 44px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="./"><img src="assets/icon.png" alt=""><div>PixelsUndo<small>PIXEL STUDIO · WATERMARK REPAIR</small></div></a>
+    <div class="navlinks">
+      <a href="#features">功能</a><a href="#shots">界面</a><a href="#start">开始使用</a><a href="https://github.com/OStonefishO/PixelsUndo">GitHub</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <span class="eyebrow"><i class="dot"></i>LOCAL FIRST · 图片不离开你的电脑</span>
+      <h1>把照片，<br><em>折叠</em>成像素。</h1>
+      <p class="lead">PixelsUndo 是一款本地像素画工作室：把普通照片变成有调色板、抖动和描边的像素画，再用画笔把水印擦回画面。手机连同一 Wi-Fi 扫码即可继续。</p>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/OStonefishO/PixelsUndo/releases/latest">↓ 下载 Windows 版</a>
+        <a class="btn ghost" href="https://github.com/OStonefishO/PixelsUndo">查看源码</a>
+        <a class="btn ghost" href="#start">手机使用</a>
+      </div>
+      <div class="dedication">
+        <img src="assets/avatar.png" alt="StoneFish8">
+        <div><span>THIS EDITION IS FOR</span><strong>StoneFish8</strong></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <img src="assets/pixel.png" alt="PixelsUndo 像素工坊界面">
+      <span class="tag">v1.1.0 · PIXEL + REPAIR</span>
+    </div>
+  </header>
+
+  <section id="features">
+    <h2>一块画布，两种手艺</h2>
+    <p class="sub">像素化和去水印共用同一份原图，随时按“按住对比”查看差别。</p>
+    <div class="grid">
+      <article class="card"><div class="ico">▦</div><h3>像素画引擎</h3><p>长边 16–512 像素，7 套配色、3 种抖动、描边强度，以及饱和度 / 对比度 / 亮度微调。右侧实时预览，导出 NEAREST 放大的清晰 PNG。</p></article>
+      <article class="card"><div class="ico">◐</div><h3>色阶与调色板</h3><p>输入黑场 / 白场、Gamma、输出黑场 / 白场五段控制；颜色数量 2–64 精确可选，4/8/12/16/24/32/48/64 一键切换，不再“看起来差不多”。</p></article>
+      <article class="card"><div class="ico">✦</div><h3>画笔去水印</h3><p>画笔、橡皮、智能选取三种蒙版工具，OpenCV Telea / Navier-Stokes 内容识别修复，支持撤销重做和按住查看修复前。</p></article>
+      <article class="card"><div class="ico">⌁</div><h3>手机扫码继续</h3><p>桌面端点“手机访问”出现二维码，同一 Wi-Fi 下扫码即可在手机上涂蒙版、调参数。横屏和竖屏都做了触控布局，双指缩放平移。</p></article>
+      <article class="card"><div class="ico">↻</div><h3>内置检查更新</h3><p>版本号就在状态栏，点一下检查 GitHub Release。发现新版本直接打开下载页，不用自己记版本。</p></article>
+      <article class="card"><div class="ico">▣</div><h3>本地优先</h3><p>没有账号、没有上传队列。图片只在本机内存和本地 data 目录里流转，退出程序即关闭局域网入口。</p></article>
+    </div>
+  </section>
+
+  <section id="shots">
+    <h2>界面</h2>
+    <p class="sub">深色像素工作室，左侧调参数，中间看画面，底部看状态。</p>
+    <div class="shots">
+      <figure class="shot"><img src="assets/pixel.png" alt="像素工坊"><figcaption>像素工坊 / 128 × 80 / 20 色</figcaption></figure>
+      <figure class="shot"><img src="assets/clean.png" alt="去水印"><figcaption>去水印 / 画笔蒙版 / 内容识别修复</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="start">
+    <h2>三种打开方式</h2>
+    <p class="sub">Windows 桌面版、局域网手机版，或部署到自己的云主机。</p>
+    <div class="steps">
+      <div class="step"><b>下载 Windows 版</b><p>解压后双击 PixelsUndo.exe，浏览器会自动打开。首次启动会在程序旁生成 data 目录。</p></div>
+      <div class="step"><b>手机扫码</b><p>点顶栏二维码按钮，手机连同一个 Wi-Fi 扫码。首次使用先运行“允许手机访问.bat”放行防火墙。</p></div>
+      <div class="step"><b>添加到主屏幕</b><p>iPhone Safari → 分享 → 添加到主屏幕；Android Chrome → 菜单 → 添加到主屏幕，获得全屏入口。</p></div>
+      <div class="step"><b>部署成永久网址</b><p>仓库内置 Dockerfile 与 render.yaml，在 Render 新建 Blueprint 即可获得 HTTPS 在线版；Railway 可用 railway.json 做镜像站。</p></div>
+    </div>
+    <div class="note">在线版需要一个云主机账号（Render / Railway 等）。GitHub Pages 只能托管这个介绍页，不能直接运行 Python + OpenCV 的去水印后端。部署步骤见仓库 README 的“永久网址 / 镜像”章节。</div>
+  </section>
+
+  <footer>
+    <div>PixelsUndo v1.1.0 · For <b>StoneFish8</b><br><span class="mono">PYTHON · OPENCV · VANILLA JS</span></div>
+    <div><a href="https://github.com/OStonefishO/PixelsUndo">github.com/OStonefishO/PixelsUndo</a><br><span class="mono">LOCAL FIRST / NO UPLOAD</span></div>
+  </footer>
+</div>
+</body>
+</html>
