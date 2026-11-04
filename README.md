@@ -38,7 +38,7 @@ PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成
 
 ## 下载 Android App
 
-打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 **`PixelsUndo-Android.apk`**，在手机上允许“安装未知应用”后安装。App 需要网络，打开的是在线版；导出时会把图片直接保存到相册 `Pictures/PixelsUndo`。当前 APK 为 v1.2.0。
+打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 **`PixelsUndo-Android.apk`**，在手机上允许“安装未知应用”后安装。App 需要网络，打开的是在线版；导出时会把图片直接保存到相册 `Pictures/PixelsUndo`。当前 APK 为 v1.4.0。
 
 > APK 使用自签名调试证书，未上架应用商店；Android 可能提示“未经认证的应用”，选择继续安装即可。
 
