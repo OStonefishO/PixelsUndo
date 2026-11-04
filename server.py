@@ -152,7 +152,8 @@ def check_update(force: bool = False) -> dict:
         },
     )
     try:
-        with urlrequest.urlopen(request, timeout=6) as response:
+        opener = urlrequest.build_opener(urlrequest.ProxyHandler({}))
+        with opener.open(request, timeout=6) as response:
             data = json.loads(response.read().decode("utf-8", "replace"))
         latest = str(data.get("tag_name") or data.get("name") or "").strip()
         if latest:
