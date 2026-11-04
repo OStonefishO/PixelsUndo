@@ -1214,6 +1214,30 @@
         throw new Error(message);
       }
       const blob = await response.blob();
+
+      // Inside the Android WebView wrapper, blob downloads are not handled by
+      // the browser. Hand the bytes to the native bridge so they land in the
+      // phone's Pictures/PixelsUndo album instead.
+      if (window.PixelsUndoAndroid && window.PixelsUndoAndroid.saveImage) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const result = String(reader.result || "");
+            const comma = result.indexOf(",");
+            window.PixelsUndoAndroid.saveImage(
+              `${base}.${extension}`,
+              comma >= 0 ? result.slice(comma + 1) : result
+            );
+          } catch (error) {
+            toast("保存到相册失败", "error");
+          }
+        };
+        reader.onerror = () => toast("读取导出图片失败", "error");
+        reader.readAsDataURL(blob);
+        els.exportModal.hidden = true;
+        return;
+      }
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

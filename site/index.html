@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PixelsUndo — 把照片折叠成像素，把水印擦回画面</title>
-<meta name="description" content="PixelsUndo 是一款本地运行的像素画工作室：照片转像素画、色阶与调色板控制、画笔去水印、手机扫码使用。">
+<meta name="description" content="PixelsUndo 在线像素画工作室：照片转像素画、色阶与调色板控制、画笔去水印，无需安装，手机和电脑都能直接使用。">
 <meta name="theme-color" content="#0a0d07">
 <link rel="icon" href="assets/icon.png">
 <style>
@@ -67,19 +67,20 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
   <nav>
     <a class="brand" href="./"><img src="assets/icon.png" alt=""><div>PixelsUndo<small>PIXEL STUDIO · WATERMARK REPAIR</small></div></a>
     <div class="navlinks">
-      <a href="#features">功能</a><a href="#shots">界面</a><a href="#start">开始使用</a><a href="https://github.com/OStonefishO/PixelsUndo">GitHub</a>
+      <a href="#features">功能</a><a href="#shots">界面</a><a href="https://pixelsundo.onrender.com/">在线使用</a><a href="#start">开始使用</a><a href="https://github.com/OStonefishO/PixelsUndo">GitHub</a>
     </div>
   </nav>
 
   <header class="hero">
     <div>
-      <span class="eyebrow"><i class="dot"></i>LOCAL FIRST · 图片不离开你的电脑</span>
+      <span class="eyebrow"><i class="dot"></i>ONLINE NOW · 无需安装，打开就用</span>
       <h1>把照片，<br><em>折叠</em>成像素。</h1>
-      <p class="lead">PixelsUndo 是一款本地像素画工作室：把普通照片变成有调色板、抖动和描边的像素画，再用画笔把水印擦回画面。手机连同一 Wi-Fi 扫码即可继续。</p>
+      <p class="lead">PixelsUndo 是一个可以直接在线使用的像素画工作室：把普通照片变成有调色板、抖动和描边的像素画，再用画笔把水印擦回画面。电脑、手机打开浏览器就能用，也可以下载 Windows 版或 Android App。</p>
       <div class="actions">
-        <a class="btn primary" href="https://github.com/OStonefishO/PixelsUndo/releases/latest">↓ 下载 Windows 版</a>
+        <a class="btn primary" href="https://pixelsundo.onrender.com/">▶ 在线使用 PixelsUndo</a>
         <a class="btn ghost" href="https://github.com/OStonefishO/PixelsUndo">查看源码</a>
-        <a class="btn ghost" href="https://render.com/deploy?repo=https://github.com/OStonefishO/PixelsUndo">部署在线版</a>
+        <a class="btn ghost" href="https://github.com/OStonefishO/PixelsUndo/releases/latest">↓ 下载 Windows 版</a>
+        <a class="btn ghost" href="https://github.com/OStonefishO/PixelsUndo/releases/latest/download/PixelsUndo-Android.apk">↓ 下载 Android App</a>
         <a class="btn ghost" href="#start">手机使用</a>
       </div>
       <div class="dedication">
@@ -100,9 +101,9 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
       <article class="card"><div class="ico">▦</div><h3>像素画引擎</h3><p>长边 16–512 像素，7 套配色、3 种抖动、描边强度，以及饱和度 / 对比度 / 亮度微调。右侧实时预览，导出 NEAREST 放大的清晰 PNG。</p></article>
       <article class="card"><div class="ico">◐</div><h3>色阶与调色板</h3><p>输入黑场 / 白场、Gamma、输出黑场 / 白场五段控制；颜色数量 2–64 精确可选，4/8/12/16/24/32/48/64 一键切换，不再“看起来差不多”。</p></article>
       <article class="card"><div class="ico">✦</div><h3>画笔去水印</h3><p>画笔、橡皮、智能选取三种蒙版工具，OpenCV Telea / Navier-Stokes 内容识别修复，支持撤销重做和按住查看修复前。</p></article>
-      <article class="card"><div class="ico">⌁</div><h3>手机扫码继续</h3><p>桌面端点“手机访问”出现二维码，同一 Wi-Fi 下扫码即可在手机上涂蒙版、调参数。横屏和竖屏都做了触控布局，双指缩放平移。</p></article>
+      <article class="card"><div class="ico">⌁</div><h3>手机与 Android App</h3><p>手机打开在线版即可使用，也可以安装 Android App。桌面端仍保留“手机访问”二维码，同一 Wi-Fi 下扫码继续，双指缩放和平移都做了触控适配。</p></article>
       <article class="card"><div class="ico">↻</div><h3>内置检查更新</h3><p>版本号就在状态栏，点一下检查 GitHub Release。发现新版本直接打开下载页，不用自己记版本。</p></article>
-      <article class="card"><div class="ico">▣</div><h3>本地优先</h3><p>没有账号、没有上传队列。图片只在本机内存和本地 data 目录里流转，退出程序即关闭局域网入口。</p></article>
+      <article class="card"><div class="ico">▣</div><h3>本地或云端，自己选</h3><p>Windows 版全程在本机处理，图片不离开电脑；在线版为了一次性处理而上传到临时目录，服务重启即清空，不建账号、不做长期存储。</p></article>
     </div>
   </section>
 
@@ -116,15 +117,15 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
   </section>
 
   <section id="start">
-    <h2>三种打开方式</h2>
-    <p class="sub">Windows 桌面版、局域网手机版，或部署到自己的云主机。</p>
+    <h2>四种打开方式</h2>
+    <p class="sub">在线版、Windows 桌面版、Android App，或者局域网手机版。</p>
     <div class="steps">
+      <div class="step"><b>直接在线使用</b><p>打开 pixelsundo.onrender.com，上传图片即可开始。免费实例闲置会休眠，首次打开可能需要等 30 秒左右唤醒。</p></div>
       <div class="step"><b>下载 Windows 版</b><p>解压后双击 PixelsUndo.exe，浏览器会自动打开。首次启动会在程序旁生成 data 目录。</p></div>
-      <div class="step"><b>手机扫码</b><p>点顶栏二维码按钮，手机连同一个 Wi-Fi 扫码。首次使用先运行“允许手机访问.bat”放行防火墙。</p></div>
-      <div class="step"><b>添加到主屏幕</b><p>iPhone Safari → 分享 → 添加到主屏幕；Android Chrome → 菜单 → 添加到主屏幕，获得全屏入口。</p></div>
-      <div class="step"><b>部署成永久网址</b><p>仓库内置 Dockerfile 与 render.yaml，在 Render 新建 Blueprint 即可获得 HTTPS 在线版；Railway 可用 railway.json 做镜像站。</p></div>
+      <div class="step"><b>手机添加到主屏幕</b><p>在线版用 iPhone Safari → 分享 → 添加到主屏幕；Android Chrome → 菜单 → 安装应用。局域网 HTTP 只是快捷方式，HTTPS 在线版才是可安装 PWA。</p></div>
+      <div class="step"><b>Android App</b><p>下载 PixelsUndo-Android.apk 安装即可；它是对在线版的 WebView 封装，导出图片会保存到相册 Pictures/PixelsUndo。</p></div>
     </div>
-    <div class="note">在线版需要一个云主机账号（Render / Railway 等）。GitHub Pages 只能托管这个介绍页，不能直接运行 Python + OpenCV 的去水印后端。部署步骤见仓库 README 的“永久网址 / 镜像”章节。</div>
+    <div class="note">在线版运行在 Render 免费实例上，闲置 15 分钟会休眠，首次打开需要等它唤醒；图片只在该次会话的临时目录处理，服务重启即清空。Render 本身没有镜像站，国内访问慢时可以用 GitHub Pages 的介绍页与 jsDelivr 镜像，但完整后端需要另一台服务器。</div>
   </section>
 
   <footer>
@@ -134,3 +135,6 @@ footer .mono{font-family:var(--mono);letter-spacing:.06em}
 </div>
 </body>
 </html>
+
+
+

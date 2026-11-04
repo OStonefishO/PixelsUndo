@@ -1,4 +1,4 @@
-.venv/
+﻿.venv/
 __pycache__/
 *.pyc
 build/
@@ -18,3 +18,8 @@ data/edge-*/
 data/pip-unpack-*/
 wheels/
 web/qa-*.html
+android/*.jks
+android/build/
+PixelsUndo-Android.apk
+data/*.log
+

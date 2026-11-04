@@ -1,12 +1,12 @@
-# PixelsUndo
+﻿# PixelsUndo
 
 **把照片折叠成像素，把水印擦成风景。**
 
-[官网](https://ostonefisho.github.io/PixelsUndo/) · [镜像](https://cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/index.html) · [GitHub 仓库](https://github.com/OStonefishO/PixelsUndo) · Windows 本地运行 · 手机同 Wi-Fi 可用
+**在线使用：https://pixelsundo.onrender.com** · [官网](https://ostonefisho.github.io/PixelsUndo/) · [镜像](https://cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/index.html) · [GitHub 仓库](https://github.com/OStonefishO/PixelsUndo)
 
-PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照片变成可导出的像素画，一边用画笔/智能选取 + 内容识别修复擦掉水印。图片不会上传到任何服务器；电脑处理完成后，同一 Wi-Fi 下的手机也能直接打开继续用。
+PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成可导出的像素画，一边用画笔/智能选取 + 内容识别修复擦掉水印。它有三种用法：**在线版**打开浏览器就能用；**Windows 版**全程在本机处理；**Android App** 是对在线版的封装，导出图片会存进相册。
 
-> **v1.1.0** · 新增色阶、精确颜色数量、内置检查更新、手机触控优化，以及 **For StoneFish8** 专属头像页签。
+> **v1.1.0** · 新增色阶、精确颜色数量、内置检查更新、手机触控优化、在线版与 Android App，以及 **For StoneFish8** 专属头像。
 
 | 像素工坊 | 去水印 |
 | --- | --- |
@@ -16,11 +16,21 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 ---
 
+## 直接在线使用
+
+打开 **https://pixelsundo.onrender.com**，上传图片即可。免费实例闲置 15 分钟会休眠，第一次打开可能需要等 30–60 秒唤醒；图片只在该次会话的临时目录处理，服务重启即清空。
+
 ## 下载 Windows 版
 
 打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 `PixelsUndo-Windows.zip`，解压后双击 **`PixelsUndo.exe`**。无需安装 Python，首次启动会在 exe 旁边创建 `data` 文件夹。
 
 > exe 没有购买代码签名证书。Windows SmartScreen 提示“已保护你的电脑”时，点“更多信息 → 仍要运行”；杀毒软件若误报，把解压目录加入信任即可。
+
+## 下载 Android App
+
+打开 [Releases](https://github.com/OStonefishO/PixelsUndo/releases/latest)，下载 **`PixelsUndo-Android.apk`**，在手机上允许“安装未知应用”后安装。App 需要网络，打开的是在线版；导出时会把图片直接保存到相册 `Pictures/PixelsUndo`。
+
+> APK 使用自签名调试证书，未上架应用商店；Android 可能提示“未经认证的应用”，选择继续安装即可。
 
 ## 快速开始（源码运行）
 
@@ -52,20 +62,24 @@ PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照
 
 ## 永久网址与镜像站
 
-项目主页（GitHub Pages，静态介绍页）已经上线：
+**完整在线版已经上线：https://pixelsundo.onrender.com**，手机和电脑都可以直接打开，也可以“添加到主屏幕”。GitHub Pages 主页负责介绍、截图和下载：
 
 - 主站：**https://ostonefisho.github.io/PixelsUndo/**
 - 镜像：**https://cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/index.html**
 
-主站是永久的，可以放在手机书签里；镜像走 jsDelivr CDN，适合主站访问慢时使用。它们负责介绍、截图和下载入口。因为去水印依赖 Python + OpenCV，GitHub Pages **不能**直接运行完整应用，完整在线版需要一台云主机。
+静态主页是永久的，镜像走 jsDelivr CDN，适合主站访问慢时使用。因为去水印依赖 Python + OpenCV，GitHub Pages **不能**运行完整应用；完整版跑在 Render 的 Docker 服务上。
 
-### 部署完整在线版（Render）
+### Render 有没有镜像站？
+
+没有。Render 一个服务只有一个 `*.onrender.com` 域名，绑定自定义域名或套 CDN 仍然指向同一个服务，不是独立镜像。真正的镜像需要在另一家平台再部署一份 Python 后端；免费额度有限，两份 24 小时服务会很快耗尽 Render 的 750 小时/月。静态介绍页有 GitHub Pages + jsDelivr 两个入口，但完整后端目前只有 Render 这一份。
+
+### 重新部署 / 自己部署
 
 一键入口：**https://render.com/deploy?repo=https://github.com/OStonefishO/PixelsUndo**
 
 1. 登录 [Render](https://render.com)，打开上面的 Blueprint 链接，或选择 **New → Blueprint** 连接本仓库。
 2. Render 会自动读取 `render.yaml` 和 `Dockerfile`，创建一个免费 Web Service。
-3. 部署完成后得到形如 `https://pixelsundo.onrender.com` 的永久 HTTPS 地址；手机可直接打开，也可“添加到主屏幕”。
+3. 部署完成后得到 `https://<service>.onrender.com` 的 HTTPS 地址；手机可直接打开，也可“添加到主屏幕”。
 4. 建议在 Render 环境变量里设置 `PIXELSUNDO_PASSWORD`（自定义访问密码）。设置后浏览器会弹出登录框；`/api/health` 保持免密，供 Render 健康检查使用。
 
 免费实例会在闲置后休眠，第一次打开可能需要 30–60 秒唤醒；会话数据是临时的，重启即清空。
@@ -195,3 +209,6 @@ cd PixelsUndo
 ## 隐私
 
 所有图片仅保存在本机 `data/sessions`，不会上传到任何第三方服务。电脑端默认只监听本机；启动脚本会同时开启局域网访问，方便同一 Wi-Fi 下的手机使用。手机访问没有登录校验，退出程序后局域网入口随服务一起关闭。退出程序后可手动删除 `data/sessions` 清空记录。云端部署时请设置 `PIXELSUNDO_PASSWORD`，否则任何拿到网址的人都能使用该实例。
+
+
+
