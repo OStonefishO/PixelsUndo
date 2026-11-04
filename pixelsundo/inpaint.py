@@ -210,6 +210,15 @@ def inpaint(image: Image.Image, mask: Image.Image, method: str = "telea",
     bgr = cv2.cvtColor(np.asarray(rgb), cv2.COLOR_RGB2BGR)
     if method == "content":
         repaired = _content_inpaint(bgr, prepared, radius)
+    elif method == "lama":
+        try:
+            from .lama import available, inpaint_bgr
+            if not available():
+                raise RuntimeError("LaMa model is not installed")
+            repaired = inpaint_bgr(bgr, prepared)
+        except Exception:
+            # The model is optional; keep the editor usable without it.
+            repaired = _content_inpaint(bgr, prepared, radius)
     else:
         flag = cv2.INPAINT_NS if method == "ns" else cv2.INPAINT_TELEA
         repaired = cv2.inpaint(bgr, prepared, max(2, min(24, int(radius))), flag)

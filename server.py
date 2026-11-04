@@ -72,6 +72,14 @@ if _bundled_samples.is_dir() and _bundled_samples.resolve() != SAMPLE_DIR.resolv
                 pass
 
 
+def _lama_available() -> bool:
+    try:
+        from pixelsundo import lama
+        return bool(lama.available())
+    except Exception:
+        return False
+
+
 def lan_addresses():
     """Return usable IPv4 addresses for this machine, outbound first."""
     found = []
@@ -427,6 +435,7 @@ class PixelsUndoHandler(BaseHTTPRequestHandler):
                 "ok": True,
                 "version": __version__,
                 "opencv": repair.has_opencv(),
+                "lama": _lama_available(),
                 "lan": net["lan"],
                 "lanUrl": net["primary"] if net["lan"] else "",
             })
@@ -555,6 +564,8 @@ class PixelsUndoHandler(BaseHTTPRequestHandler):
             raise ApiError("请先涂抹或选取要修复的区域")
         method = str(payload.get("method") or "telea")
         radius = int(payload.get("radius") or 6)
+        if method == "lama" and not _lama_available():
+            raise ApiError("当前环境未安装 LaMa 模型，请改用“内容识别”，或把 models/lama_fp32.onnx 放到程序目录。")
         repaired = repair.inpaint(image, mask_image, method=method, radius=radius)
 
         history = list(meta["history"])

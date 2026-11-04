@@ -943,10 +943,15 @@
       toast("请先涂抹或选取水印区域", "error");
       return;
     }
-    const slow = els.method.value === "content";
+    const method = els.method.value;
+    const slow = method === "content" || method === "lama";
     showBusy(
       "正在修复画面",
-      slow ? "内容识别正在比对周围纹理，大片水印约需 10–30 秒…" : "读取周围像素并填补水印",
+      method === "lama"
+        ? "LaMa 正在理解画面结构，首次加载模型约 20–40 秒，请保持页面打开…"
+        : slow
+          ? "内容识别正在比对周围纹理，大片水印约需 10–30 秒…"
+          : "读取周围像素并填补水印",
     );
     const maskUrl = state.maskCanvas.toDataURL("image/png");
     try {
@@ -1738,6 +1743,16 @@
       if (health.version) {
         els.versionLabel.textContent = `v${health.version}`;
         els.updateCurrent.textContent = `v${health.version}`;
+      }
+      const lamaOption = els.method.querySelector('option[value="lama"]');
+      if (lamaOption) {
+        lamaOption.disabled = !health.lama;
+        lamaOption.textContent = health.lama
+          ? "AI 修复 · LaMa（最自然，约 30 秒）"
+          : "AI 修复 · LaMa（当前环境未安装模型）";
+        if (!health.lama && els.method.value === "lama") {
+          els.method.value = "content";
+        }
       }
     } catch (error) {
       els.statusEngine.textContent = "PIXELSUNDO";

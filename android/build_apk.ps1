@@ -11,8 +11,8 @@ $Out = Join-Path $AndroidDir "build"
 $Keystore = Join-Path $AndroidDir "pixelsundo-release.jks"
 $RealKeystore = Join-Path $ProjectRoot "android\pixelsundo-release.jks"
 $KeyPass = "pixelsundo"
-$VersionName = "1.3.0"
-$VersionCode = 130
+$VersionName = "1.4.0"
+$VersionCode = 140
 
 if (Test-Path $Root) { Remove-Item $Root -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $Root | Out-Null
@@ -109,5 +109,7 @@ Assert-LastExit "apksigner verify"
 Copy-Item $Apk (Join-Path $ProjectRoot "PixelsUndo-Android.apk") -Force
 Copy-Item $Keystore $RealKeystore -Force
 Write-Host "7/7 done: $ProjectRoot\PixelsUndo-Android.apk"
+
+
 
 
