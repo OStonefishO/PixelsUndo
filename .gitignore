@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+data/sessions/
+data/logs/
+data/runtime.json
+data/*.png
+data/*.svg
+data/*.out
+data/*.err
+data/edge-*/
+data/pip-unpack-*/
+wheels/
