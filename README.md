@@ -2,7 +2,7 @@
 
 **把照片折叠成像素，把水印擦成风景。**
 
-[GitHub 仓库](https://github.com/OStonefishO/PixelsUndo) · Windows 本地运行 · 手机同 Wi-Fi 可用
+[官网](https://ostonefisho.github.io/PixelsUndo/) · [镜像](https://cdn.jsdelivr.net/gh/OStonefishO/PixelsUndo@main/site/index.html) · [GitHub 仓库](https://github.com/OStonefishO/PixelsUndo) · Windows 本地运行 · 手机同 Wi-Fi 可用
 
 PixelsUndo 是一款完全在本地运行的图片小工具：一边把普通照片变成可导出的像素画，一边用画笔/智能选取 + 内容识别修复擦掉水印。图片不会上传到任何服务器；电脑处理完成后，同一 Wi-Fi 下的手机也能直接打开继续用。
 
