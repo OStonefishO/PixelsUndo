@@ -1,4 +1,4 @@
-﻿# PixelsUndo
+# PixelsUndo
 
 **把照片折叠成像素，把水印擦成风景。**
 
@@ -13,6 +13,12 @@ PixelsUndo 是一款像素画 + 去水印小工具：一边把普通照片变成
 | ![像素工坊](docs/screenshot-pixel.png) | ![去水印](docs/screenshot-clean.png) |
 
 ![PixelsUndo 独立窗口](docs/screenshot-native.png)
+
+### 内容识别修复对比
+
+![去水印前后对比](docs/inpaint-compare.png)
+
+上边是半透明平铺水印，下边是 1.3.0 的内容识别结果。它会从周围寻找相似的云、水纹、屋檐来补洞，而不是把整片区域抹成平均色；大块水印仍建议分几次涂抹，边缘会自然很多。
 
 ![手机访问](docs/screenshot-phone.png)
 

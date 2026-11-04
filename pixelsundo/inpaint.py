@@ -119,6 +119,11 @@ def _patch_fill(bgr: np.ndarray, mask: np.ndarray, patch: int = 5,
         known = ~tm
         if int(known.sum()) < max(6, tm.size // 5):
             continue
+        # Flat regions (sky, water) are better served by the smooth Telea
+        # seed; synthesising patches there produces ghost clouds.  Only use
+        # exemplars where the neighbourhood actually carries texture.
+        if float(tp[known].std()) < 8.0:
+            continue
         best = None
         best_score = 1e18
         for _ in range(candidates):
@@ -135,7 +140,7 @@ def _patch_fill(bgr: np.ndarray, mask: np.ndarray, patch: int = 5,
             if score < best_score:
                 best_score = score
                 best = sp
-        if best is not None:
+        if best is not None and best_score < 1400.0:
             tp[tm] = best[tm]
             padded[ty - r:ty + r + 1, tx - r:tx + r + 1] = tp
     return padded[r:r + h, r:r + w]
@@ -169,7 +174,10 @@ def _content_inpaint(bgr: np.ndarray, mask: np.ndarray, radius: int) -> np.ndarr
             cur[known] = base[known]
             cur = cv2.inpaint(cur, lm, 2, cv2.INPAINT_TELEA)
         if int((lm > 0).sum()) > 180:
-            cur = _patch_fill(cur, lm, search=search)
+            # The coarsest levels can afford to skip every other pixel; the
+            # final level must fill every masked pixel, otherwise the skipped
+            # pixels keep their Telea seed and show up as speckles.
+            cur = _patch_fill(cur, lm, search=search, step=1 if level == 1 else 2)
         prev = cur
     result = cv2.resize(prev, (w, h), interpolation=cv2.INTER_CUBIC)
     known = mask == 0
